@@ -19,10 +19,9 @@ set<char> terminals, nonterminals;
 map<char,set<char>> FIRST, FOLLOW;
 
 vector<State> states;
-map<pair<int,char>, int> GOTO_TABLE;   // GOTO transitions
-map<pair<int,char>, string> ACTION;    // ACTION table
+map<pair<int,char>, int> GOTO_TABLE;   
+map<pair<int,char>, string> ACTION;   
 
-// ---------- Utilities ----------
 bool is_terminal(char c) {
     return nonterminals.count(c)==0;
 }
@@ -40,7 +39,6 @@ int find_state(const State &s) {
     return -1;
 }
 
-// ---------- Closure & GOTO ----------
 State closure(State I) {
     bool changed;
     do {
@@ -77,7 +75,6 @@ State GOTO(const State &I,char X) {
     return closure(J);
 }
 
-// ---------- FIRST & FOLLOW ----------
 void compute_FIRST() {
     bool changed;
     do {
@@ -136,7 +133,6 @@ void compute_FOLLOW() {
     }while(changed);
 }
 
-// ---------- Build States ----------
 void build_states() {
     State I0;
     I0.items.push_back({grammar[0].lhs,grammar[0].rhs,0});
@@ -161,7 +157,6 @@ void build_states() {
     }
 }
 
-// ---------- Build Parsing Table ----------
 void build_parsing_table() {
     compute_FIRST();
     compute_FOLLOW();
@@ -193,7 +188,6 @@ void build_parsing_table() {
     }
 }
 
-// ---------- Print Functions ----------
 void print_grammar() {
     cout<<"Grammar Rules:\n";
     for(int i=0;i<grammar.size();i++)
@@ -246,7 +240,6 @@ void print_table() {
     cout<<"\n";
 }
 
-// ---------- Parse Input ----------
 void parse(string input) {
     cout<<"Parsing input string: "<<input<<"\n";
     input+="$";
@@ -286,9 +279,7 @@ void parse(string input) {
     }
 }
 
-// ---------- Main ----------
 int main() {
-    // Hardcoded grammar for your example:
     grammar={
         {'Q',"S"},
         {'S',"CC"},
@@ -309,5 +300,6 @@ int main() {
 
     return 0;
 }
+
 
 
