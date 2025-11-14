@@ -5,7 +5,6 @@
 #include <cctype>
 using namespace std;
 
-// Token definitions
 unordered_set<string> keywords = {
     "auto", "break", "case", "char", "const", "continue", "default", "do",
     "double", "else", "enum", "float", "for", "goto", "if", "int", "long",
@@ -20,7 +19,6 @@ unordered_set<string> operators = {
 
 unordered_set<char> special_symbols = {'(', ')', '{', '}', ';', ','};
 
-// Function prototypes
 bool isKeyword(const string& word);
 bool isOperator(const string& op);
 bool isSpecialSymbol(char ch);
@@ -28,7 +26,6 @@ bool isValidIdentifier(const string& word);
 bool isNumber(const string& word);
 void processFile(const string& filename);
 
-// Global counters
 int keywordCount = 0, identifierCount = 0, numberCount = 0;
 int operatorCount = 0, specialCount = 0, literalCount = 0, errorCount = 0;
 
@@ -102,7 +99,6 @@ void processFile(const string& filename) {
 
         if (isspace(ch)) continue;
 
-        // Handle comments
         if (ch == '/') {
             if (file.peek() == '/') {
                 while (file.get(ch) && ch != '\n');
@@ -120,7 +116,6 @@ void processFile(const string& filename) {
             }
         }
 
-        // Handle string literals
         if (ch == '"') {
             string literal = "\"";
             int start_line = current_line;
@@ -138,7 +133,6 @@ void processFile(const string& filename) {
             continue;
         }
 
-        // Handle words (identifiers/keywords/numbers)
         if (isalpha(ch) || ch == '_' || isdigit(ch)) {
             token = ch;
             while (file.peek() && (isalnum(file.peek()) || file.peek() == '_' || file.peek() == '.')) {
@@ -162,7 +156,6 @@ void processFile(const string& filename) {
             continue;
         }
 
-        // Handle operators
         if (isOperator(string(1, ch))) {
             string op(1, ch);
             if (isOperator(string(1, file.peek()))) {
@@ -176,18 +169,17 @@ void processFile(const string& filename) {
             operatorCount++;
             continue;
         }
-
-        // Handle special symbols
+        
         if (isSpecialSymbol(ch)) {
             cout << "[Line " << current_line << "] special symbol: " << ch << endl;
             specialCount++;
             continue;
         }
 
-        // Everything else is an error
         cout << "[Line " << current_line << "] ERROR: Unrecognized symbol '" << ch << "'\n";
         errorCount++;
     }
 
     file.close();
 }
+
