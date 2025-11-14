@@ -44,11 +44,10 @@ static inline bool isIdentChar(char c) {
 
 vector<string> tokenize(const string &s_in) {
     string s = s_in;
-    // replace unicode ≠ with "!=" if present
     for (size_t p = 0; p + 2 <= s.size(); ++p) {
         if ((unsigned char)s[p] == 0xC2 || (unsigned char)s[p] == 0xE2) { /*skip - crude*/ }
     }
-    // quick replace common unicode '≠' (U+2260) with "!="
+    
     size_t pos;
     while ((pos = s.find("≠")) != string::npos) s.replace(pos, 3, "!=");
 
@@ -75,7 +74,7 @@ vector<string> tokenize(const string &s_in) {
         if (isalpha((unsigned char)c)) {
             string id;
             while (i < s.size() && isIdentChar(s[i])) { id.push_back(s[i]); ++i; }
-            // keywords mapping
+          
             string low = id;
             for (auto &ch : low) ch = (char)tolower((unsigned char)ch);
             if (low == "and") toks.push_back("AND");
@@ -116,7 +115,7 @@ int prec(const string &op) {
 }
 vector<string> infixToPostfix(const vector<string> &tokens) {
     vector<string> output;
-    vector<string> st; // operator stack
+    vector<string> st; 
 
     for (size_t i = 0; i < tokens.size(); ++i) {
         string tok = tokens[i];
@@ -150,8 +149,8 @@ string generateFromPostfixAndAppend(const vector<string> &postfix,
 {
     if (postfix.empty()) return "";
 
-    stack<string> quadStack;    // holds operand names (identifiers or tX)
-    stack<string> tripleStack;  // holds operand representations (either "a" or "(idx)")
+    stack<string> quadStack;    
+    stack<string> tripleStack;  
 
     for (const string &tok : postfix) {
         if (!isOperatorToken(tok)) {
@@ -160,7 +159,7 @@ string generateFromPostfixAndAppend(const vector<string> &postfix,
         } else {
             // operator
             if (quadStack.size() < 2) {
-                // malformed expression: return best-effort
+                
                 return "";
             }
             string arg2_q = quadStack.top(); quadStack.pop();
@@ -171,27 +170,24 @@ string generateFromPostfixAndAppend(const vector<string> &postfix,
 
             string temp = "t" + to_string(tcount++);
 
-            // Quadruple
             Quadruple q{tok, arg1_q, arg2_q, temp};
             quads.push_back(q);
 
-            // Triple (index will be current size before push)
+        
             Triple tr{tok, arg1_tr, arg2_tr};
             triples.push_back(tr);
             int trIdx = (int)triples.size() - 1;
             string trRef = "(" + to_string(trIdx) + ")";
 
-            // push results back
+          
             quadStack.push(temp);
             tripleStack.push(trRef);
 
-            // record equation string in readable form (use quad arg names)
             string eq = temp + " = " + arg1_q + " " + tok + " " + arg2_q;
             equations.push_back(eq);
         }
     }
 
-    // final result might be a temp or single operand
     if (!quadStack.empty()) return quadStack.top();
     return "";
 }
@@ -204,7 +200,6 @@ void processArithmeticExpression(const string &exprStr,
                                  int &tcount)
 {
     auto toks = tokenize(exprStr);
-    // remove stray semicolons or commas if present
     vector<string> exprTokens;
     for (auto &tk : toks) {
         if (tk == ";" || tk == "," ) continue;
@@ -222,7 +217,6 @@ void processIfStatement(const string &ifStr,
                         int &tcount)
 {
     auto toks = tokenize(ifStr);
-    // find '(' after 'if' and matching ')'
     size_t ifPos = 0;
     for (size_t i = 0; i < toks.size(); ++i) if (toks[i] == "if") { ifPos = i; break; }
 
@@ -238,10 +232,8 @@ void processIfStatement(const string &ifStr,
     }
     if (rpar == string::npos) return;
 
-    // condition tokens are between lpar+1 ... rpar-1
     vector<string> condTokens(toks.begin() + lpar + 1, toks.begin() + rpar);
 
-    // find 'then' and 'else' positions
     size_t thenPos = string::npos, elsePos = string::npos;
     for (size_t i = rpar+1; i < toks.size(); ++i) {
         if (toks[i] == "then") { thenPos = i; break; }
@@ -251,21 +243,16 @@ void processIfStatement(const string &ifStr,
     }
     if (thenPos == string::npos || elsePos == string::npos) return;
 
-    // then statement tokens: thenPos+1 .. elsePos-1
     vector<string> thenTokens(toks.begin() + thenPos + 1, toks.begin() + elsePos);
-    // else tokens: elsePos+1 .. end
     vector<string> elseTokens(toks.begin() + elsePos + 1, toks.end());
 
-    // Convert condition to postfix and generate TAC (appending to quads/triples)
     auto postfixCond = infixToPostfix(condTokens);
-    // capture triple size before condition (so we can reference it)
     size_t beforeCondTripleCount = triples.size();
     generateFromPostfixAndAppend(postfixCond, quads, triples, equations, tcount);
     int condTripleIndex = (int)triples.size() - 1; // last triple index for condition result
     string condTempName;
     if (!quads.empty()) condTempName = quads.back().result; // last temp produced for condition
 
-    // Create labels L1 (else) and L2 (end)
     static int labelSerial = 1;
     string L1 = "L" + to_string(labelSerial++);
     string L2 = "L" + to_string(labelSerial++);
@@ -283,33 +270,29 @@ void processIfStatement(const string &ifStr,
         if (!cur.empty()) thenStmts.push_back(cur);
     }
 
-    // process each then-statement
+
     for (auto &stmt : thenStmts) {
-        // look for assignment '='
         auto itEq = find(stmt.begin(), stmt.end(), "=");
         if (itEq != stmt.end()) {
             string lhs = *(itEq - (itEq==stmt.begin() ? 0 : 1));
-            // RHS tokens are after '='
             vector<string> rhsTokens(itEq + 1, stmt.end());
-            // generate RHS TAC (if expression), capture last result
+           
             if (!rhsTokens.empty()) {
                 auto postfixRhs = infixToPostfix(rhsTokens);
-                // track triple count before RHS
+            
                 int beforeRhsTriple = (int)triples.size();
                 string rhsTemp;
                 if (!postfixRhs.empty()) {
                     generateFromPostfixAndAppend(postfixRhs, quads, triples, equations, tcount);
                     if (!quads.empty()) rhsTemp = quads.back().result;
                 }
-                // assignment quad
+         
                 if (rhsTemp.empty()) {
-                    // simple immediate (e.g., 1)
                     string imm = rhsTokens.size() == 1 ? rhsTokens[0] : "";
                     quads.push_back({"=", imm, "-", lhs});
                     triples.push_back({"=", imm, lhs});
                 } else {
                     quads.push_back({"=", rhsTemp, "-", lhs});
-                    // triple: refer to RHS triple index if exists
                     int rhsIdx = (int)triples.size() - 1;
                     triples.push_back({"=", "(" + to_string(rhsIdx) + ")", lhs});
                 }
@@ -317,15 +300,15 @@ void processIfStatement(const string &ifStr,
         }
     }
 
-    // GOTO L2
+
     quads.push_back({"GOTO", "-", "-", L2});
     triples.push_back({"GOTO", "-", L2});
 
-    // Label L1
+
     quads.push_back({"Label", "-", "-", L1});
     triples.push_back({"Label", "-", L1});
 
-    // ELSE part (same parsing)
+
     vector<vector<string>> elseStmts;
     {
         vector<string> cur;
@@ -360,12 +343,11 @@ void processIfStatement(const string &ifStr,
         }
     }
 
-    // Label L2
     quads.push_back({"Label", "-", "-", L2});
     triples.push_back({"Label", "-", L2});
 }
 
-// Process a while-statement like: while (i < n) { sum = sum + i; i = i + 1; }
+
 void processWhileStatement(const string &whileStr,
                            vector<Quadruple> &quads,
                            vector<Triple> &triples,
@@ -373,11 +355,11 @@ void processWhileStatement(const string &whileStr,
                            int &tcount)
 {
     auto toks = tokenize(whileStr);
-    // find 'while'
+   
     size_t whilePos = 0;
     for (size_t i = 0; i < toks.size(); ++i) if (toks[i] == "while") { whilePos = i; break; }
 
-    // find '(' after while and matching ')'
+ 
     size_t lpar = string::npos;
     for (size_t i = whilePos + 1; i < toks.size(); ++i) if (toks[i] == "(") { lpar = i; break; }
     if (lpar == string::npos) return;
@@ -389,7 +371,7 @@ void processWhileStatement(const string &whileStr,
     }
     if (rpar == string::npos) return;
 
-    // body between '{' and '}'
+   
     size_t lbrace = string::npos, rbrace = string::npos;
     for (size_t i = rpar + 1; i < toks.size(); ++i) if (toks[i] == "{") { lbrace = i; break; }
     if (lbrace == string::npos) return;
@@ -399,18 +381,16 @@ void processWhileStatement(const string &whileStr,
         else if (toks[i] == "}") { /*we treat char*/ }
         if (toks[i] == "}") { --bdepth; if (bdepth == 0) { rbrace = i; break; } }
     }
-    // fallback: find last '}'.
+
     if (rbrace == string::npos) {
         for (size_t i = toks.size(); i-- > 0;) if (toks[i] == "}") { rbrace = i; break; }
     }
     if (rbrace == string::npos) return;
 
-    // condition tokens:
+
     vector<string> condTokens(toks.begin() + lpar + 1, toks.begin() + rpar);
-    // body tokens:
     vector<string> bodyTokens(toks.begin() + lbrace + 1, toks.begin() + rbrace);
 
-    // Labels
     static int labelSerial = 1000; 
     string L1 = "L" + to_string(labelSerial++);
     string L2 = "L" + to_string(labelSerial++);
@@ -528,4 +508,5 @@ int main() {
     cout << "\n";
     return 0;
 }
+
 
