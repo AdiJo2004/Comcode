@@ -13,7 +13,6 @@ struct Production {
     string lhs;
 };
 
-// Tokenizer: splits operators and parentheses even if no spaces
 vector<string> tokenize(const string &str) {
     vector<string> tokens;
     string cur;
@@ -34,7 +33,6 @@ vector<string> tokenize(const string &str) {
     return tokens;
 }
 
-// Stack as string
 string stackToString(stack<string> stk) {
     vector<string> elems;
     while (!stk.empty()) { elems.push_back(stk.top()); stk.pop(); }
@@ -45,7 +43,6 @@ string stackToString(stack<string> stk) {
     return out;
 }
 
-// Input buffer as string
 string inputBufferToString(const vector<string> &tokens, int ip) {
     string out;
     for (int i = ip; i < (int)tokens.size(); ++i) out += tokens[i] + " ";
@@ -53,7 +50,6 @@ string inputBufferToString(const vector<string> &tokens, int ip) {
     return out;
 }
 
-// Match production with top of stack
 bool matchProduction(stack<string> &stk, const Production &prod) {
     int n = prod.rhs.size();
     if ((int)stk.size() < n) return false;
@@ -68,14 +64,12 @@ bool matchProduction(stack<string> &stk, const Production &prod) {
     return true;
 }
 
-// Do reduction
 void doReduce(stack<string> &stk, const Production &prod) {
     int n = prod.rhs.size();
     for (int i = 0; i < n; ++i) stk.pop();
     stk.push(prod.lhs);
 }
 
-// Precedence guard
 bool shouldReduce(const Production &prod, const string &lookahead) {
     // Delay E -> E + T if next is *
     if (prod.lhs == "E" && prod.rhs.size() == 3 &&
@@ -184,4 +178,5 @@ int main() {
     }
     return 0;
 }
+
 
