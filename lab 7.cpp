@@ -20,7 +20,6 @@ int lastVT[MAXSYM][MAXSYM];
 
 char prec[MAXSYM][MAXSYM];  // precedence table
 
-// ================= helpers ====================
 int idxNT(char c) {
     for (int i = 0; i < nNonT; ++i) if (nonT[i] == c) return i;
     return -1;
@@ -40,7 +39,6 @@ void addT(char c) {
     if (idxT(c) == -1) terms[nTerm++] = c;
 }
 
-// ================= FIRSTVT / LASTVT ====================
 void computeFirstVT() {
     int changed = 1;
     while (changed) {
@@ -102,7 +100,6 @@ void computeLastVT() {
     }
 }
 
-// ================= precedence table ====================
 void buildPrecedence() {
     if (idxT('$') == -1) terms[nTerm++] = '$';
 
@@ -180,7 +177,6 @@ void buildPrecedence() {
     }
 }
 
-// ================== parser ====================
 int topmostTerminalIndex(char stack[], int top) {
     for (int i = top; i >= 0; i--) {
         if (!isupper(stack[i])) { 
@@ -256,7 +252,6 @@ void parseInput(char input[]) {
     }
 }
 
-// ================= main ====================
 int main() {
     printf("Enter number of productions: ");
     scanf("%d", &nProd); getchar();
@@ -309,4 +304,5 @@ int main() {
     parseInput(input);
     return 0;
 }
+
 
