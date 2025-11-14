@@ -38,7 +38,6 @@ void printTriples(const vector<Triple>& triples) {
     }
 }
 
-// ---------------- Tokenizer ----------------
 static inline bool isIdentChar(char c) {
     return isalnum((unsigned char)c) || c == '_';
 }
@@ -95,15 +94,12 @@ vector<string> tokenize(const string &s_in) {
             toks.push_back(num);
             continue;
         }
-
-        // fallback single char token
         toks.push_back(string(1, c));
         ++i;
     }
     return toks;
 }
 
-// ---------------- Shunting Yard (infix -> postfix) ----------------
 bool isOperatorToken(const string &t) {
     static const unordered_set<string> ops = {
         "+","-","*","/","<",">","<=",">=","==","!=","AND","OR"
@@ -146,7 +142,6 @@ vector<string> infixToPostfix(const vector<string> &tokens) {
     return output;
 }
 
-// ---------------- Generate TAC from postfix, appending to provided vectors ----------------
 string generateFromPostfixAndAppend(const vector<string> &postfix,
                                    vector<Quadruple> &quads,
                                    vector<Triple> &triples,
@@ -201,11 +196,7 @@ string generateFromPostfixAndAppend(const vector<string> &postfix,
     return "";
 }
 
-// ---------------- High-level processors ----------------
 
-// Process an arithmetic expression (e.g. "(A+B)*(C-D)/(E+F)")
-// Appends generated quads/triples/equations to the provided containers.
-// Resets/uses tcount passed by caller.
 void processArithmeticExpression(const string &exprStr,
                                  vector<Quadruple> &quads,
                                  vector<Triple> &triples,
@@ -223,9 +214,7 @@ void processArithmeticExpression(const string &exprStr,
     generateFromPostfixAndAppend(postfix, quads, triples, equations, tcount);
 }
 
-// Process an if-statement of form:
-// if ( <condition> ) then <stmt> else <stmt>
-// where <stmt> are simple assignments (e.g. x = 1) or expressions
+
 void processIfStatement(const string &ifStr,
                         vector<Quadruple> &quads,
                         vector<Triple> &triples,
@@ -281,12 +270,9 @@ void processIfStatement(const string &ifStr,
     string L1 = "L" + to_string(labelSerial++);
     string L2 = "L" + to_string(labelSerial++);
 
-    // IF_FALSE cond goto L1
     quads.push_back({"IF_FALSE", condTempName, "-", L1});
     triples.push_back({"IF_FALSE", "(" + to_string(condTripleIndex) + ")", L1});
 
-    // THEN part: assume simple assignment(s) separated by ';' or single token set
-    // Join thenTokens into statements by ';'
     vector<vector<string>> thenStmts;
     {
         vector<string> cur;
@@ -542,3 +528,4 @@ int main() {
     cout << "\n";
     return 0;
 }
+
