@@ -9,25 +9,21 @@ using namespace std;
 #define STATES 20
 #define SYMBOLS 10
 
-// Grammar rules
 struct Production {
     char lhs;
     string rhs;
 };
 
-// Item structure
 struct Item {
     char lhs;
     string rhs;
     int dot_position;
 };
 
-// State structure
 struct State {
     vector<Item> items;
 };
 
-// Stack structure for parsing
 struct Stack {
     vector<int> items;
     void push(int x) { items.push_back(x); }
@@ -36,7 +32,6 @@ struct Stack {
     bool empty() { return items.empty(); }
 };
 
-// Global variables
 vector<Production> grammar;
 vector<State> states;
 vector<char> terminals;
@@ -44,7 +39,6 @@ vector<char> non_terminals;
 string action[STATES][SYMBOLS];
 int goto_table[STATES][SYMBOLS];
 
-// ---------- Utility functions ----------
 bool item_exists(State &state, Item item) {
     for (auto &it : state.items) {
         if (it.lhs == item.lhs && it.rhs == item.rhs && it.dot_position == item.dot_position) {
@@ -67,7 +61,6 @@ int symbol_index(char sym, vector<char> &arr) {
     return -1;
 }
 
-// ---------- Printing ----------
 void print_state(int index) {
     cout << "State " << index << ":\n";
     for (auto &it : states[index].items) {
@@ -85,7 +78,6 @@ void print_state(int index) {
     cout << "\n";
 }
 
-// ---------- Closure & GOTO ----------
 void closure(State &state) {
     bool added;
     do {
@@ -147,7 +139,6 @@ int state_index(State &new_state) {
     return -1;
 }
 
-// ---------- Build states ----------
 void build_states() {
     states.clear();
     State s0;
@@ -192,7 +183,6 @@ void build_states() {
     }
 }
 
-// ---------- Parsing Table ----------
 void build_parsing_table() {
     for (int i = 0; i < STATES; i++) {
         for (int j = 0; j < SYMBOLS; j++) {
@@ -248,7 +238,6 @@ void print_parsing_table() {
     }
 }
 
-// ---------- Parsing ----------
 void parse_input(string input_str) {
     Stack state_stack, symbol_stack;
     state_stack.push(0);
@@ -299,7 +288,7 @@ void parse_input(string input_str) {
 }
 
 int main() {
-    // Define grammar rules (excluding augmented one)
+  
     grammar.push_back({ 'S', "CC" });
     grammar.push_back({ 'C', "cC" });
     grammar.push_back({ 'C', "d" });
@@ -310,19 +299,16 @@ int main() {
     terminals = { 'c', 'd', '$' };
     non_terminals = { 'S', 'C', 'Q' };
 
-    // Build parsing table
+
     build_parsing_table();
 
-    // Print canonical collection
     cout << "\nCanonical Collection of LR(0) Items:\n";
     for (int i = 0; i < states.size(); i++) {
         print_state(i);
     }
 
-    // Print parsing table
     print_parsing_table();
 
-    // Input string
     string input_str;
     cout << "\nEnter input string (e.g. ccdd): ";
     cin >> input_str;
@@ -332,3 +318,4 @@ int main() {
 
     return 0;
 }
+
