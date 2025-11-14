@@ -296,10 +296,11 @@ int main() {
     print_states();
     print_dfa();
     print_table();
-    parse("ccdd"); // fixed input
+    parse("ccdd"); 
 
     return 0;
 }
+
 
 
 
