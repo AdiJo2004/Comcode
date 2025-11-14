@@ -21,12 +21,11 @@ map<Symbol, set<Symbol>> FIRST, FOLLOW;
 map<pair<Symbol, Symbol>, vector<Symbol>> parsingTable;
 Symbol startSymbol;
 
-// Check if a symbol is terminal
+
 bool isTerminal(const Symbol& s) {
     return terminals.count(s) > 0;
 }
 
-// Tokenizer that splits spaces and also parentheses/brackets into separate tokens
 vector<Symbol> tokenizeWithParentheses(const string& str) {
     vector<Symbol> tokens;
     stringstream ss(str);
@@ -53,7 +52,7 @@ vector<Symbol> tokenizeWithParentheses(const string& str) {
     return tokens;
 }
 
-// Compute FIRST set
+
 set<Symbol> computeFIRST(const Symbol &sym) {
     if (FIRST.count(sym)) return FIRST[sym];
     set<Symbol> result;
@@ -80,7 +79,6 @@ set<Symbol> computeFIRST(const Symbol &sym) {
     return FIRST[sym] = result;
 }
 
-// Compute FOLLOW set
 set<Symbol> computeFOLLOW(const Symbol &sym) {
     if (FOLLOW.count(sym)) return FOLLOW[sym];
     set<Symbol> result;
@@ -111,7 +109,6 @@ set<Symbol> computeFOLLOW(const Symbol &sym) {
     return FOLLOW[sym] = result;
 }
 
-// Build LL(1) table
 void buildParsingTable() {
     for (const auto &prod : productions) {
         bool epsilonAll = true;
@@ -133,7 +130,6 @@ void buildParsingTable() {
     }
 }
 
-// Display FIRST and FOLLOW sets side by side in one table
 void displayFirstFollowCombined() {
     cout << "\nFIRST and FOLLOW Sets (side-by-side):\n";
     cout << "+--------------+-------------------------+-------------------------+\n";
@@ -163,7 +159,6 @@ void displayFirstFollowCombined() {
     cout << "+--------------+-------------------------+-------------------------+\n";
 }
 
-// Display parsing table
 void displayParsingTable() {
     vector<Symbol> termList(terminals.begin(), terminals.end());
     termList.push_back("$");
@@ -191,7 +186,6 @@ void displayParsingTable() {
     }
 }
 
-// Parse and show steps
 bool parseString(const vector<Symbol>& tokens) {
     stack<Symbol> st;
     st.push("$");
@@ -293,3 +287,4 @@ int main() {
     cout << "Parser terminated. Goodbye!\n";
     return 0;
 }
+
